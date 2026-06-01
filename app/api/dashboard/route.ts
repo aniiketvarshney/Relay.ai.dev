@@ -34,7 +34,15 @@ export async function GET() {
       where: {
         calledAt: { gte: today },
         success: false,
-        errorType: { in: ['SECURITY_BLOCKED', 'FORBIDDEN_KEY', 'PAYLOAD_TOO_LARGE', 'PAYLOAD_TOO_DEEP'] },
+        errorType: {
+          in: [
+            'SECURITY_BLOCKED',
+            'FORBIDDEN_KEY',
+            'PROMPT_INJECTION',
+            'PAYLOAD_TOO_LARGE',
+            'PAYLOAD_TOO_DEEP',
+          ],
+        },
       },
     }),
     prisma.telemetry.findMany({
