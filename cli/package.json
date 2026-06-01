@@ -1,0 +1,7 @@
+{
+  "name": "agent-registry-cli",
+  "version": "1.0.0",
+  "description": "Publish your API to Relay in seconds.",
+  "bin": { "agent-registry": "./index.js" },
+  "dependencies": { "js-yaml": "^4.1.0" }
+}

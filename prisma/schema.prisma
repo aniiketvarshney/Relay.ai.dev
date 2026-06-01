@@ -1,0 +1,51 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("POSTGRES_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Manifest {
+  id          String      @id @default(uuid())
+  name        String
+  version     String      @default("1.0.0")
+  description String
+  serverUrl   String
+  authType    String      @default("none")
+  authHeader  String?
+  domain      String?
+  tools       Json
+  docString   String?
+  tokenCount  Int?
+  publishedAt DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  mcpConfig   McpConfig?
+  telemetry   Telemetry[]
+}
+
+model McpConfig {
+  id          String   @id @default(uuid())
+  manifestId  String   @unique
+  manifest    Manifest @relation(fields: [manifestId], references: [id], onDelete: Cascade)
+  mcpEndpoint String
+  active      Boolean  @default(true)
+  rateLimit   Int      @default(1000)
+  timeout     Int      @default(30000)
+  createdAt   DateTime @default(now())
+}
+
+model Telemetry {
+  id         String   @id @default(uuid())
+  manifestId String
+  manifest   Manifest @relation(fields: [manifestId], references: [id], onDelete: Cascade)
+  toolName   String
+  agentId    String?
+  latencyMs  Int
+  success    Boolean
+  errorType  String?
+  errorMsg   String?
+  calledAt   DateTime @default(now())
+}
