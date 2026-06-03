@@ -17,9 +17,7 @@ https://relay-developer.vercel.app
 curl https://relay-developer.vercel.app/api/registry
 ```
 
-## Live investor test
 
-Verify Relay is real in under 2 minutes — no mock UI, live API + database audit log.
 
 **Base URL:** `https://relay-developer.vercel.app` (or your deployed Vercel URL)
 
