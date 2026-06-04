@@ -25,3 +25,25 @@ graph LR
     style Halt fill:#ffcccc,stroke:#333,stroke-width:2px
     style Forward fill:#ccffcc,stroke:#333,stroke-width:2px
 ```
+
+
+
+## 📊 Audit Logging & Dashboard
+
+Relay now includes full audit logging for small business security:
+
+### Features Added:
+- **Complete Audit Trail** - Every tool call, block, and decision is logged
+- **Risk Scoring** - Every action gets a risk score (0-100)
+- **Audit API** - Available at `/api/audit/logs`
+- **Ready for Dashboard** - Easy to build UI to see all logs
+
+### Next (Coming Soon):
+- Beautiful Dashboard page
+- Search & Filter logs
+- Export to CSV
+- Real-time alerts
+
+---
+
+**Made with ❤️ for small business AI agents**
