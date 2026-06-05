@@ -13,7 +13,7 @@ export interface AuditLogEntry {
   userId?: string;
   ip?: string;
   threatDetails?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;   // Fixed: no 'any'
 }
 
 export class AuditLogger {
