@@ -28,9 +28,11 @@ model manifest {
   version     String
   description String?
   endpoint    String?
+  domain      String?     // Added this field
   calledAt    DateTime    @default(now())
 
   telemetry   telemetry[]
+
 }
 
 model telemetry {
