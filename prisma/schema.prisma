@@ -17,3 +17,19 @@ model AuditLog {
   reason    String?
   createdAt DateTime @default(now())
 }
+
+model manifest {
+  id          String   @id @default(cuid())
+  name        String
+  version     String
+  description String?
+  endpoint    String?
+  calledAt    DateTime @default(now())
+}
+
+model telemetry {
+  id        String   @id @default(cuid())
+  eventType String
+  data      Json
+  calledAt  DateTime @default(now())
+}
