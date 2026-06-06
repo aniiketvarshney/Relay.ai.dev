@@ -59,10 +59,22 @@ export async function GET() {
     prisma.telemetry.findMany({
       take: 20,
       orderBy: { calledAt: 'desc' },
-      include: {
+      select: {
+        id: true,
+        success: true,
+        manifestId: true,
+        toolName: true,
+        eventType: true,
+        data: true,
+        errorType: true,
+        errorMsg: true,
+        calledAt: true,
+        latencyMs: true,
+        agentId: true,
         manifest: {
           select: {
             name: true,
+            domain: true,
           },
         },
       },
@@ -154,18 +166,17 @@ export async function GET() {
       calledAt: r.calledAt.toISOString(),
       toolName: r.toolName,
 
-      // Safe fallback if manifest is missing
       manifestName: r.manifest?.name || 'Unknown',
 
       manifestId: r.manifestId,
 
-      // Always return unknown
-      agentId: 'unknown',
+      agentId: r.agentId ?? 'unknown',
+      latencyMs: r.latencyMs ?? 0,
 
-      latencyMs: r.latencyMs,
       verdict: getVerdict(r),
       threatType: getThreatType(r.errorType, r.errorMsg),
-      errorMsg: r.errorMsg,
+
+      errorMsg: r.errorMsg ?? '',
       success: r.success,
     })),
 
