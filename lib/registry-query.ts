@@ -1,11 +1,10 @@
 import type { Prisma } from '@prisma/client';
 
-/** Build Prisma filter for registry list: ?q= (name + description) AND ?domain= */
 export function buildRegistryWhere(
   q: string | null,
   domain: string | null
-): Prisma.ManifestWhereInput {
-  const where: Prisma.ManifestWhereInput = {};
+): Prisma.manifestWhereInput {
+  const where: Prisma.manifestWhereInput = {};
   const query = q?.trim();
   const domainFilter = domain?.trim();
 
