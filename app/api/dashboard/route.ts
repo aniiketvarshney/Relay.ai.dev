@@ -94,7 +94,7 @@ export async function GET() {
       id: r.id,
       calledAt: r.calledAt.toISOString(),
       toolName: r.toolName,
-      manifestName: r.manifest.name,
+      manifestName: r.manifest?.name || 'Unknown',
       manifestId: r.manifestId,
       agentId: r.agentId,
       latencyMs: r.latencyMs,
