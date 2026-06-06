@@ -159,8 +159,8 @@ export async function GET() {
 
       manifestId: r.manifestId,
 
-      // Safe fallback if agentId is missing
-      agentId: r.agentId || 'unknown',
+      // Always return unknown
+      agentId: 'unknown',
 
       latencyMs: r.latencyMs,
       verdict: getVerdict(r),
