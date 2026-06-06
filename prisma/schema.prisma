@@ -7,7 +7,6 @@ datasource db {
   url      = env("POSTGRES_URL")
 }
 
-// Audit logs for security
 model AuditLog {
   id            String   @id @default(cuid())
   timestamp     DateTime @default(now())
@@ -23,29 +22,34 @@ model AuditLog {
   createdAt     DateTime @default(now())
 }
 
-// Existing models your code needs
 model manifest {
-  id          String   @id @default(cuid())
+  id          String      @id @default(cuid())
   name        String
   version     String
   description String?
   endpoint    String?
-  calledAt    DateTime @default(now())
+  calledAt    DateTime    @default(now())
+
+  telemetry   telemetry[]
 }
 
 model telemetry {
-  id         String   @id @default(cuid())
-  eventType  String
-  data       Json
-  success    Boolean  @default(true)
-  errorType  String?
-  calledAt   DateTime @default(now())
+  id          String    @id @default(cuid())
+  manifestId  String?
+  toolName    String?
+  eventType   String
+  data        Json
+  success     Boolean   @default(true)
+  errorType   String?
+  calledAt    DateTime  @default(now())
+
+  manifest    manifest? @relation(fields: [manifestId], references: [id])
 }
 
 model McpConfig {
-  id        String   @id @default(cuid())
-  name      String
-  config    Json
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String   @id @default(cuid())
+  name        String
+  config      Json
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
