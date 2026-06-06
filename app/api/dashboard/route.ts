@@ -11,7 +11,10 @@ function startOfDay(d = new Date()) {
 
 export async function GET() {
   if (!isDatabaseConfigured()) {
-    return NextResponse.json({ error: 'Database not configured' }, { status: 503 });
+    return NextResponse.json(
+      { error: 'Database not configured' },
+      { status: 503 }
+    );
   }
 
   const today = startOfDay();
@@ -28,8 +31,15 @@ export async function GET() {
     sparklineRaw,
   ] = await Promise.all([
     prisma.manifest.count(),
-    prisma.telemetry.count({ where: { calledAt: { gte: today } } }),
-    prisma.telemetry.count({ where: { calledAt: { gte: today } } }),
+
+    prisma.telemetry.count({
+      where: { calledAt: { gte: today } },
+    }),
+
+    prisma.telemetry.count({
+      where: { calledAt: { gte: today } },
+    }),
+
     prisma.telemetry.count({
       where: {
         calledAt: { gte: today },
@@ -45,20 +55,39 @@ export async function GET() {
         },
       },
     }),
+
     prisma.telemetry.findMany({
       take: 20,
       orderBy: { calledAt: 'desc' },
-      include: { manifest: { select: { name: true } } },
+      include: {
+        manifest: {
+          select: {
+            name: true,
+          },
+        },
+      },
     }),
+
     prisma.telemetry.groupBy({
       by: ['manifestId', 'toolName'],
       _count: { id: true },
-      orderBy: { _count: { id: 'desc' } },
+      orderBy: {
+        _count: {
+          id: 'desc',
+        },
+      },
       take: 8,
     }),
+
     prisma.telemetry.findMany({
-      where: { calledAt: { gte: sevenDaysAgo } },
-      select: { calledAt: true },
+      where: {
+        calledAt: {
+          gte: sevenDaysAgo,
+        },
+      },
+      select: {
+        calledAt: true,
+      },
     }),
   ]);
 
@@ -71,8 +100,16 @@ export async function GET() {
   ];
 
   const manifests = await prisma.manifest.findMany({
-    where: { id: { in: manifestIds } },
-    select: { id: true, name: true, domain: true },
+    where: {
+      id: {
+        in: manifestIds,
+      },
+    },
+    select: {
+      id: true,
+      name: true,
+      domain: true,
+    },
   });
 
   const manifestMap = Object.fromEntries(
@@ -91,10 +128,16 @@ export async function GET() {
       (r) => r.calledAt.toISOString().slice(0, 10) === key
     ).length;
 
-    sparkline.push({ date: key, count });
+    sparkline.push({
+      date: key,
+      count,
+    });
   }
 
-  const maxCalls = Math.max(...topToolsRaw.map((t) => t._count.id), 1);
+  const maxCalls = Math.max(
+    ...topToolsRaw.map((t) => t._count.id),
+    1
+  );
 
   return NextResponse.json({
     stats: {
@@ -103,23 +146,29 @@ export async function GET() {
       proxiedToday,
       threatsBlockedToday,
     },
+
     sparkline,
+
     recentActivity: recentRaw.map((r) => ({
       id: r.id,
       calledAt: r.calledAt.toISOString(),
       toolName: r.toolName,
 
-      // Updated line:
+      // Safe fallback if manifest is missing
       manifestName: r.manifest?.name || 'Unknown',
 
       manifestId: r.manifestId,
-      agentId: r.agentId,
+
+      // Safe fallback if agentId is missing
+      agentId: r.agentId || 'unknown',
+
       latencyMs: r.latencyMs,
       verdict: getVerdict(r),
       threatType: getThreatType(r.errorType, r.errorMsg),
       errorMsg: r.errorMsg,
       success: r.success,
     })),
+
     topTools: topToolsRaw.map((t) => ({
       manifestId: t.manifestId,
       toolName: t.toolName,
