@@ -1,6 +1,6 @@
 # 🚀 Relay
 
-### A zero-configuration, zero-dependency runtime security proxy for AI agents and MCP tools.
+### A zero-configuration, no external security dependencies runtime security proxy for AI agents and MCP tools.
 
 <p align="center">
   <a href="https://relay-ai-kappa.vercel.app"><b>Website</b></a> | 
@@ -43,6 +43,21 @@ Relay now includes full audit logging for small business security:
 - Search & Filter logs
 - Export to CSV
 - Real-time alerts
+
+
+## 🚀 Getting Started
+
+1. Clone & install: `npm install`
+2. Copy `.env.example` → `.env.local` and add your Neon DB URL
+3. Push schema: `npm run db:push`
+4. Run dev server: `npm run dev`
+
+## 📡 API Usage Example
+
+```bash
+curl -X POST http://localhost:3000/api/proxy \
+  -H "Content-Type: application/json" \
+  -d '{"tool":"search_repos","args":{"keyword":"relay"}}'
 
 ---
 
