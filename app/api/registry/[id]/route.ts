@@ -15,7 +15,6 @@ export async function GET(_req: NextRequest, { params }: Params) {
   const manifest = await prisma.manifest.findUnique({
     where: { id },
     include: {
-      mcpConfig: true,
       telemetry: {
         orderBy: { calledAt: 'desc' },
         take: 100,
@@ -44,26 +43,15 @@ export async function GET(_req: NextRequest, { params }: Params) {
 
   const total = manifest.telemetry.length;
   const successful = manifest.telemetry.filter((t) => t.success).length;
-  const avgLatency =
-    total > 0
-      ? Math.round(manifest.telemetry.reduce((s, t) => s + t.latencyMs, 0) / total)
-      : 0;
-
-  const agentCounts: Record<string, number> = {};
-  for (const t of manifest.telemetry) {
-    const a = t.agentId ?? 'anonymous';
-    agentCounts[a] = (agentCounts[a] ?? 0) + 1;
-  }
-  const topAgents = Object.entries(agentCounts)
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 5)
-    .map(([id, count]) => ({ agentId: id, count }));
 
   const securityEvents = manifest.telemetry.slice(0, 10).map((t) => ({
-    ...t,
+    id: t.id,
     calledAt: t.calledAt.toISOString(),
+    toolName: t.toolName,
+    success: t.success,
+    errorType: t.errorType,
     verdict: getVerdict(t),
-    threatType: getThreatType(t.errorType, t.errorMsg),
+    threatType: getThreatType(t.errorType, null),
   }));
 
   const verdicts = { allowed: 0, flagged: 0, blocked: 0 };
@@ -75,18 +63,21 @@ export async function GET(_req: NextRequest, { params }: Params) {
   }
 
   const lastActive = manifest.telemetry[0]?.calledAt.toISOString() ?? null;
-  const callCount = manifest.telemetry.length;
 
   return NextResponse.json({
-    ...manifest,
-    publishedAt: manifest.publishedAt.toISOString(),
-    updatedAt: manifest.updatedAt.toISOString(),
+    id: manifest.id,
+    name: manifest.name,
+    version: manifest.version,
+    description: manifest.description,
+    endpoint: manifest.endpoint,
+    domain: manifest.domain,
+    calledAt: manifest.calledAt.toISOString(),
     analytics: {
       dailyVolume,
       successRate: total ? ((successful / total) * 100).toFixed(1) : '0',
-      avgLatencyMs: avgLatency,
-      topAgents,
-      callCount,
+      avgLatencyMs: 0,
+      topAgents: [],
+      callCount: total,
       lastActive,
     },
     security: { events: securityEvents, verdicts },

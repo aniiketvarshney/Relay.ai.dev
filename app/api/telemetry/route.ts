@@ -9,19 +9,22 @@ export async function GET() {
       prisma.telemetry.findMany({
         orderBy: { calledAt: 'desc' },
         take: 20,
-        include: { manifest: { select: { name: true } } }
+        include: { manifest: { select: { name: true } } },
       }),
     ]);
-
-    const avgLatency = records.length > 0
-      ? Math.round(records.reduce((sum, r) => sum + r.latencyMs, 0) / records.length)
-      : 0;
 
     return NextResponse.json({
       total_calls: total,
       success_rate: total > 0 ? ((successful / total) * 100).toFixed(1) + '%' : '0%',
-      avg_latency_ms: avgLatency,
-      recent: records,
+      avg_latency_ms: 0,
+      recent: records.map((r) => ({
+        id: r.id,
+        calledAt: r.calledAt.toISOString(),
+        toolName: r.toolName,
+        success: r.success,
+        errorType: r.errorType,
+        manifestName: r.manifest?.name ?? 'Unknown',
+      })),
     });
   } catch {
     return NextResponse.json({ error: 'Server error' }, { status: 500 });

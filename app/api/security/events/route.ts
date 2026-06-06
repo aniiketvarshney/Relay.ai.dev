@@ -18,17 +18,14 @@ export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const verdictFilter = searchParams.get('verdict');
   const days = parseInt(searchParams.get('days') ?? '7', 10);
-  const agentId = searchParams.get('agentId')?.trim();
   const manifestId = searchParams.get('manifestId')?.trim();
   const limit = Math.min(parseInt(searchParams.get('limit') ?? '50', 10), 100);
-
   const since = daysAgo(days === 1 ? 0 : days - 1);
 
   const records = await prisma.telemetry.findMany({
     where: {
       calledAt: { gte: since },
       ...(manifestId ? { manifestId } : {}),
-      ...(agentId ? { agentId: { contains: agentId, mode: 'insensitive' } } : {}),
     },
     orderBy: { calledAt: 'desc' },
     take: limit,
@@ -41,13 +38,13 @@ export async function GET(req: NextRequest) {
       calledAt: r.calledAt.toISOString(),
       manifestId: r.manifestId,
       toolName: r.toolName,
-      manifestName: r.manifest.name,
-      agentId: r.agentId,
-      latencyMs: r.latencyMs,
+      manifestName: r.manifest?.name ?? 'Unknown',
+      agentId: 'unknown',
+      latencyMs: 0,
       verdict: getVerdict(r),
-      threatType: getThreatType(r.errorType, r.errorMsg),
+      threatType: getThreatType(r.errorType, null),
       errorType: r.errorType,
-      errorMsg: r.errorMsg,
+      errorMsg: '',
       success: r.success,
     }))
     .filter((e) => !verdictFilter || verdictFilter === 'all' || e.verdict === verdictFilter);

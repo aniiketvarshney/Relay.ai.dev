@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { databaseConnectionError, databaseSetupError, isDatabaseConfigured } from '@/lib/api-response';
 import { prisma } from '@/lib/prisma';
-import { buildRegistryWhere } from '@/lib/registry-query';
 
 export async function GET(req: NextRequest) {
   if (!isDatabaseConfigured()) {
@@ -10,39 +9,32 @@ export async function GET(req: NextRequest) {
 
   try {
     const { searchParams } = new URL(req.url);
-    const q = searchParams.get('q');
-    const domain = searchParams.get('domain');
-    const includeDocs = searchParams.get('docs') === 'true';
-
-    const where = buildRegistryWhere(q, domain);
+    const q = searchParams.get('q')?.trim();
+    const domain = searchParams.get('domain')?.trim();
 
     const tools = await prisma.manifest.findMany({
-      where,
-      orderBy: { publishedAt: 'desc' },
+      where: {
+        ...(q ? { OR: [
+          { name: { contains: q, mode: 'insensitive' } },
+          { description: { contains: q, mode: 'insensitive' } },
+        ]} : {}),
+        ...(domain ? { domain: { contains: domain, mode: 'insensitive' } } : {}),
+      },
+      orderBy: { calledAt: 'desc' },
       select: {
         id: true,
         name: true,
         version: true,
         description: true,
-        serverUrl: true,
-        authType: true,
+        endpoint: true,
         domain: true,
-        tools: true,
-        tokenCount: true,
-        publishedAt: true,
-        ...(includeDocs ? { docString: true } : {}),
-        mcpConfig: {
-          select: { mcpEndpoint: true, active: true },
-        },
+        calledAt: true,
       },
     });
 
     return NextResponse.json({
       count: tools.length,
-      filters: {
-        q: q?.trim() || null,
-        domain: domain?.trim() || null,
-      },
+      filters: { q: q ?? null, domain: domain ?? null },
       tools,
     });
   } catch (err) {
