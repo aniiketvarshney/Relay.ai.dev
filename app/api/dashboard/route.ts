@@ -62,7 +62,7 @@ export async function GET() {
     }),
   ]);
 
-  const manifestIds = [...new Set(topToolsRaw.map((t) => t.manifestId))];
+  const manifestIds = [...new Set(topToolsRaw.map((t) => t.manifestId).filter((id): id is string => id !== null))];
   const manifests = await prisma.manifest.findMany({
     where: { id: { in: manifestIds } },
     select: { id: true, name: true, domain: true },
