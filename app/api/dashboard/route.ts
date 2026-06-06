@@ -62,21 +62,35 @@ export async function GET() {
     }),
   ]);
 
-  const manifestIds = [...new Set(topToolsRaw.map((t) => t.manifestId).filter((id): id is string => id !== null))];
+  const manifestIds = [
+    ...new Set(
+      topToolsRaw
+        .map((t) => t.manifestId)
+        .filter((id): id is string => id !== null)
+    ),
+  ];
+
   const manifests = await prisma.manifest.findMany({
     where: { id: { in: manifestIds } },
     select: { id: true, name: true, domain: true },
   });
-  const manifestMap = Object.fromEntries(manifests.map((m) => [m.id, m]));
+
+  const manifestMap = Object.fromEntries(
+    manifests.map((m) => [m.id, m])
+  );
 
   const sparkline: { date: string; count: number }[] = [];
+
   for (let i = 0; i < 7; i++) {
     const d = new Date(sevenDaysAgo);
     d.setDate(d.getDate() + i);
+
     const key = d.toISOString().slice(0, 10);
+
     const count = sparklineRaw.filter(
       (r) => r.calledAt.toISOString().slice(0, 10) === key
     ).length;
+
     sparkline.push({ date: key, count });
   }
 
@@ -94,7 +108,10 @@ export async function GET() {
       id: r.id,
       calledAt: r.calledAt.toISOString(),
       toolName: r.toolName,
+
+      // Updated line:
       manifestName: r.manifest?.name || 'Unknown',
+
       manifestId: r.manifestId,
       agentId: r.agentId,
       latencyMs: r.latencyMs,
