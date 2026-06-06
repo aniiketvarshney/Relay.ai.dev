@@ -75,7 +75,7 @@ export async function POST(req: NextRequest) {
         name: manifest.name,
         version: manifest.version,
         description: manifest.description,
-        endpoint: manifest.serverUrl ?? manifest.endpoint ?? '',
+        endpoint: manifest.serverUrl ?? '',
         domain: manifest.domain,
       },
     });

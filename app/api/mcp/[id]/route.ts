@@ -3,14 +3,6 @@ import { prisma } from '@/lib/prisma';
 
 type Params = { params: Promise<{ id: string }> };
 
-type ManifestTool = {
-  name: string;
-  description?: string;
-  endpoint?: string;
-  method?: string;
-  inputSchema?: Record<string, unknown>;
-};
-
 type McpExecuteBody = {
   method?: string;
   tool?: string;
@@ -32,30 +24,18 @@ function jsonWithMcpHeaders(data: unknown, init?: ResponseInit) {
   });
 }
 
-function mapMcpTools(tools: unknown) {
-  const list = Array.isArray(tools) ? (tools as ManifestTool[]) : [];
-  return list.map((tool) => ({
-    name: tool.name,
-    description: tool.description,
-    inputSchema: tool.inputSchema ?? { type: 'object', properties: {} },
-  }));
-}
-
 export async function OPTIONS() {
   return new NextResponse(null, { status: 200, headers: MCP_HEADERS });
 }
 
 export async function GET(_req: NextRequest, { params }: Params) {
   const { id } = await params;
-
   const manifest = await prisma.manifest.findUnique({
     where: { id },
   });
-
   if (!manifest) {
     return jsonWithMcpHeaders({ error: 'Tool not found' }, { status: 404 });
   }
-
   return jsonWithMcpHeaders({
     type: 'manifest',
     id: manifest.id,
@@ -69,7 +49,6 @@ export async function GET(_req: NextRequest, { params }: Params) {
 
 export async function POST(req: NextRequest, { params }: Params) {
   const { id } = await params;
-
   let body: McpExecuteBody;
   try {
     body = (await req.json()) as McpExecuteBody;
@@ -80,7 +59,6 @@ export async function POST(req: NextRequest, { params }: Params) {
   const manifest = await prisma.manifest.findUnique({
     where: { id },
   });
-
   if (!manifest) {
     return jsonWithMcpHeaders({ error: 'Tool not found' }, { status: 404 });
   }
@@ -108,7 +86,6 @@ export async function POST(req: NextRequest, { params }: Params) {
   }
 
   const { tool } = body;
-
   if (!tool) {
     return jsonWithMcpHeaders({
       type: 'manifest',
@@ -127,7 +104,6 @@ export async function POST(req: NextRequest, { params }: Params) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body.input),
     });
-
     const result = await upstream.json();
     return jsonWithMcpHeaders(result, { status: upstream.status });
   } catch (err: unknown) {
