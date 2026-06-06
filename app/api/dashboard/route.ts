@@ -67,10 +67,7 @@ export async function GET() {
         eventType: true,
         data: true,
         errorType: true,
-        errorMsg: true,
         calledAt: true,
-        latencyMs: true,
-        agentId: true,
         manifest: {
           select: {
             name: true,
@@ -84,18 +81,14 @@ export async function GET() {
       by: ['manifestId', 'toolName'],
       _count: { id: true },
       orderBy: {
-        _count: {
-          id: 'desc',
-        },
+        _count: { id: 'desc' },
       },
       take: 8,
     }),
 
     prisma.telemetry.findMany({
       where: {
-        calledAt: {
-          gte: sevenDaysAgo,
-        },
+        calledAt: { gte: sevenDaysAgo },
       },
       select: {
         calledAt: true,
@@ -112,16 +105,8 @@ export async function GET() {
   ];
 
   const manifests = await prisma.manifest.findMany({
-    where: {
-      id: {
-        in: manifestIds,
-      },
-    },
-    select: {
-      id: true,
-      name: true,
-      domain: true,
-    },
+    where: { id: { in: manifestIds } },
+    select: { id: true, name: true, domain: true },
   });
 
   const manifestMap = Object.fromEntries(
@@ -129,27 +114,17 @@ export async function GET() {
   );
 
   const sparkline: { date: string; count: number }[] = [];
-
   for (let i = 0; i < 7; i++) {
     const d = new Date(sevenDaysAgo);
     d.setDate(d.getDate() + i);
-
     const key = d.toISOString().slice(0, 10);
-
     const count = sparklineRaw.filter(
       (r) => r.calledAt.toISOString().slice(0, 10) === key
     ).length;
-
-    sparkline.push({
-      date: key,
-      count,
-    });
+    sparkline.push({ date: key, count });
   }
 
-  const maxCalls = Math.max(
-    ...topToolsRaw.map((t) => t._count.id),
-    1
-  );
+  const maxCalls = Math.max(...topToolsRaw.map((t) => t._count.id), 1);
 
   return NextResponse.json({
     stats: {
@@ -164,27 +139,22 @@ export async function GET() {
     recentActivity: recentRaw.map((r) => ({
       id: r.id,
       calledAt: r.calledAt.toISOString(),
-      toolName: r.toolName,
-
-      manifestName: r.manifest?.name || 'Unknown',
-
-      manifestId: r.manifestId,
-
-      agentId: r.agentId ?? 'unknown',
-      latencyMs: r.latencyMs ?? 0,
-
+      toolName: r.toolName ?? 'unknown',
+      manifestName: r.manifest?.name ?? 'Unknown',
+      manifestId: r.manifestId ?? '',
+      agentId: 'unknown',
+      latencyMs: 0,
       verdict: getVerdict(r),
-      threatType: getThreatType(r.errorType, r.errorMsg),
-
-      errorMsg: r.errorMsg ?? '',
+      threatType: getThreatType(r.errorType, null),
+      errorMsg: '',
       success: r.success,
     })),
 
     topTools: topToolsRaw.map((t) => ({
       manifestId: t.manifestId,
       toolName: t.toolName,
-      name: manifestMap[t.manifestId]?.name ?? t.toolName,
-      domain: manifestMap[t.manifestId]?.domain,
+      name: manifestMap[t.manifestId ?? '']?.name ?? t.toolName ?? 'unknown',
+      domain: manifestMap[t.manifestId ?? '']?.domain ?? null,
       calls: t._count.id,
       pct: Math.round((t._count.id / maxCalls) * 100),
     })),
