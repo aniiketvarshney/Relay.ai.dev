@@ -106,10 +106,6 @@ export async function GET(_req: NextRequest, { params }: Params) {
       lastActive,
     },
 
-    serverUrl: manifest.serverUrl,
-    authType: manifest.authType,
-    tools: manifest.tools,
-
     security: {
       events: securityEvents,
       verdicts,
