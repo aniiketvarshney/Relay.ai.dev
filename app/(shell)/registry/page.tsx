@@ -1,4 +1,4 @@
-import { Suspense } from 'react';
+﻿import { Suspense } from 'react';
 import RegistryPage from './RegistryPageClient';
 
 export default function Page() {

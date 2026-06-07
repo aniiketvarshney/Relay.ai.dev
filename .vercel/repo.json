@@ -1,0 +1,11 @@
+{
+  "remoteName": "origin",
+  "projects": [
+    {
+      "id": "prj_4NImJQ9IlT3oGhICoswKU3q9QanK",
+      "name": "relay-ai-dev",
+      "directory": ".",
+      "orgId": "team_ixEGJG0ozNAB8cjcZW9Iu8Ps"
+    }
+  ]
+}
