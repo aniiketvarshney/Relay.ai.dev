@@ -93,10 +93,7 @@ export async function GET(_req: NextRequest, { params }: Params) {
     endpoint: manifest.endpoint,
     domain: manifest.domain,
 
-    // Fixed: use createdAt fallback instead of calledAt
-    calledAt:
-      manifest.createdAt?.toISOString() ??
-      new Date().toISOString(),
+    calledAt: new Date().toISOString(),
 
     analytics: {
       dailyVolume,
@@ -109,7 +106,6 @@ export async function GET(_req: NextRequest, { params }: Params) {
       lastActive,
     },
 
-    // Added missing fields
     serverUrl: manifest.serverUrl,
     authType: manifest.authType,
     tools: manifest.tools,
